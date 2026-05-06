@@ -1,18 +1,18 @@
-# 🔒 Self-Hosted VPN Analysis Project
+# Self-Hosted VPN Analysis Project
 [Demo of VPN](https://youtu.be/xHemKKHjR0s?si=WPD2a_4SGnNQTny4)
 
 ## Overview
 
 A comprehensive analysis comparing commercial VPN services (NordVPN) against a self-hosted OpenVPN solution. The project investigates quantitative network performance, security implications, and potential information leakage across different VPN protocols.
 
-## 🎯 Project Goals
+## Project Goals
 
 - **Performance Analysis**: Compare NordVPN (WireGuard) vs self-hosted OpenVPN
 - **Security Assessment**: Analyze traffic for information leakage and encryption effectiveness
 - **Cost-Benefit Analysis**: Evaluate commercial vs self-hosted VPN trade-offs
 - **Traffic Analysis**: Use Wireshark and custom tools for packet analysis
 
-## ⚙️ Technical Implementation
+## Technical Implementation
 
 ### VPN Solutions Tested
 - **Commercial VPN**: NordVPN (WireGuard protocol)
@@ -23,24 +23,24 @@ A comprehensive analysis comparing commercial VPN services (NordVPN) against a s
 - **VPN Protocol**: OpenVPN Access Server
 - **Analysis Tools**: Wireshark, tcpdump, custom Python/Bash scripts
 
-## 📈 Key Findings
+## Key Findings
 
-### ⚡ Performance
+### Performance
 - Self-hosted VPN showed slower speeds due to VM limitations
 - NordVPN demonstrated faster packet transfer rates with WireGuard
 - Both solutions effectively encrypted traffic
 
-### 🔒 Security
+### Security
 - OpenVPN and WireGuard both provide strong encryption
 - Minimal information leakage detected
 - Self-hosted VPN offers greater security control
 
-### 💡 Resources
+### Resources
 - Self-hosted requires technical expertise for setup/maintenance
 - Commercial VPNs provide better infrastructure for high traffic
 - Self-hosted has ongoing VM rental costs
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 myvpn/
@@ -54,7 +54,7 @@ myvpn/
 └── deliverable.md     # Project documentation
 ```
 
-## 🚀 Usage
+## Usage
 
 ```bash
 # Basic network capture
@@ -69,7 +69,7 @@ python3 networkCapture.py -f "host 192.168.0.40" -t 60
 
 ## Author
 
-**👤 Koffison Voumadi** - Technical implementation and research
+Koffison Voumadi - Technical implementation and research
 
 ---
 

@@ -3,7 +3,7 @@
 ## Contributions
 - **Koffison Voumadi** - Technical - Research on Technology & References
 
-## Review
+## Research Review
 
 While working on the VPN and self-hosted VPN project, I encountered challenges related to installation, resource limitations, and technical proficiency. The major turning point was installing the OpenVPN protocol on a virtual machine with Vultr, which required meticulous attention due to its complexity and importance for secure network access.
 
