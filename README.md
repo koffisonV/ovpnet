@@ -61,7 +61,7 @@ sudo python3 networkCapture.py -i en0 -f "host <SERVER_IP>" -t 60 -w capture.pca
 ## Project structure
 
 ```
-myvpn/
+ovpnet/
 ├── analysis/            # screenshots of results
 │   ├── encryption/      # Wireshark captures
 │   ├── speed/           # networkquality output
