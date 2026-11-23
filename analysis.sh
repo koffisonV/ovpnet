@@ -25,12 +25,17 @@ Usage: $0 [-i interface] [-d duration] [-o outdir] [-f filter] [-n max_endpoints
 Examples:
   $0 -i eth0 -d 120 -f "port 443"
   $0 -i wlan0 -d 300 -o /tmp/capture -v
+
+Requires: tcpdump, tshark (Wireshark), timeout (GNU coreutils; on macOS: brew install coreutils).
+Optional: numfmt (coreutils). Packet capture needs root or BPF access (run with sudo).
+Developed on macOS (interfaces like en0); the checks also work on Linux.
 EOF
-  exit 1
+  exit "${1:-1}"
 }
 
 log_msg() {
-  local msg="[$(date +'%Y-%m-%d %H:%M:%S')] $1"
+  local msg
+  msg="[$(date +'%Y-%m-%d %H:%M:%S')] $1"
   echo "$msg" | tee -a "$LOG_FILE"
 }
 
@@ -49,7 +54,7 @@ while getopts "i:d:o:f:n:vh" opt; do
     f) FILTER="$OPTARG" ;;
     n) MAX_ENDPOINTS="$OPTARG" ;;
     v) VERBOSE=true ;;
-    h) usage ;;
+    h) usage 0 ;;
     *) usage ;;
   esac
 done
@@ -66,8 +71,12 @@ if ! [[ "$MAX_ENDPOINTS" =~ ^[0-9]+$ ]] || [[ "$MAX_ENDPOINTS" -le 0 ]]; then
 fi
 
 # check if running as root (required for packet capture)
-if [[ $EUID -ne 0 ]] && [[ ! -r /dev/bpf* ]] 2>/dev/null; then
-  echo "Warning: Packet capture may require root privileges" >&2
+can_read_bpf=false
+for bpf_dev in /dev/bpf*; do
+  if [[ -r "$bpf_dev" ]]; then can_read_bpf=true; break; fi
+done
+if [[ $EUID -ne 0 && "$can_read_bpf" != true ]]; then
+  echo "Warning: Packet capture may require root privileges (try sudo)" >&2
 fi
 
 # ensure required tools exist
@@ -81,10 +90,11 @@ for cmd in tcpdump tshark timeout; do
 done
 
 # check if interface exists
-if ! ip link show "$IFACE" >/dev/null 2>&1; then
+# (ifconfig works on both macOS and Linux; `ip` is Linux-only)
+if ! ifconfig "$IFACE" >/dev/null 2>&1; then
   echo "Error: Network interface '$IFACE' not found" >&2
   echo "Available interfaces:" >&2
-  ip link show | grep -E '^[0-9]+:' | cut -d: -f2 | sed 's/^ */  /' >&2
+  ifconfig -l 2>/dev/null | tr ' ' '\n' | sed 's/^/  /' >&2 || true
   exit 1
 fi
 
@@ -105,19 +115,24 @@ log_msg "Output Directory: $(pwd)"
 [[ -n "$FILTER" ]] && log_msg "Filter: $FILTER"
 
 # build tcpdump command
-TCPDUMP_CMD="tcpdump -i $IFACE -w $PCAP_FILE"
-[[ -n "$FILTER" ]] && TCPDUMP_CMD="$TCPDUMP_CMD $FILTER"
+TCPDUMP_CMD=(tcpdump -i "$IFACE" -w "$PCAP_FILE")
+if [[ -n "$FILTER" ]]; then
+  read -r -a filter_parts <<< "$FILTER"
+  TCPDUMP_CMD+=("${filter_parts[@]}")
+fi
 
 verbose_log "Starting packet capture..."
 
 # Capture packets with error handling
-if ! timeout "${DURATION}s" $TCPDUMP_CMD 2>>"$LOG_FILE"; then
-  if [[ $? -eq 124 ]]; then
-    log_msg "Capture completed (timeout reached)"
-  else
-    log_msg "Capture failed - check permissions and interface"
-    exit 1
-  fi
+set +e
+timeout "${DURATION}s" "${TCPDUMP_CMD[@]}" 2>>"$LOG_FILE"
+capture_status=$?
+set -e
+if [[ "$capture_status" -eq 124 ]]; then
+  log_msg "Capture completed (timeout reached)"
+elif [[ "$capture_status" -ne 0 ]]; then
+  log_msg "Capture failed - check permissions and interface"
+  exit 1
 else
   log_msg "Capture completed successfully"
 fi
@@ -134,7 +149,13 @@ if [[ "$PCAP_SIZE" -eq 0 ]]; then
   exit 0
 fi
 
-log_msg "Captured file size: $(numfmt --to=iec "$PCAP_SIZE")"
+# numfmt is GNU coreutils; fall back to raw bytes if it is missing (stock macOS)
+if command -v numfmt >/dev/null 2>&1; then
+  HUMAN_SIZE=$(numfmt --to=iec "$PCAP_SIZE")
+else
+  HUMAN_SIZE="${PCAP_SIZE} bytes"
+fi
+log_msg "Captured file size: $HUMAN_SIZE"
 
 # generate analysis reports
 verbose_log "Generating analysis reports..."
@@ -177,7 +198,7 @@ Interface: $IFACE
 Duration: ${DURATION}s
 Filter: ${FILTER:-"none"}
 Capture File: $PCAP_FILE
-File Size: $(numfmt --to=iec "$PCAP_SIZE")
+File Size: $HUMAN_SIZE
 Total Packets: $PACKET_COUNT
 
 Generated Files:
@@ -191,7 +212,7 @@ Generated Files:
 EOF
 
 log_msg "Analysis complete. Files generated:"
-ls -la *.txt *.pcap 2>/dev/null | sed 's/^/  /' | tee -a "$LOG_FILE" || log_msg "No output files found"
+ls -la -- ./*.txt ./*.pcap 2>/dev/null | sed 's/^/  /' | tee -a "$LOG_FILE" || log_msg "No output files found"
 
 log_msg "Summary report saved to: summary_report.txt"
 verbose_log "Use 'wireshark $PCAP_FILE' for detailed analysis"

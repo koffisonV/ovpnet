@@ -1,7 +1,4 @@
-# Self-Hosted VPN 
-
-## Contributions
-- **Koffison Voumadi** - Technical - Research on Technology & References
+# Self-Hosted VPN
 
 ## Research Review
 
@@ -27,16 +24,16 @@ The VPN was hosted on AWS using a virtual machine. Virtualization allows a compu
 
 ## Tools Used
 
-To assess network performance, we used various tools and methodologies. Screenshots document our setup, methodologies, and comparative analysis of our self-hosted VPN versus NordVPN.
+To assess network performance, I used various tools and methodologies. Screenshots document my setup, methodologies, and comparative analysis of my self-hosted VPN versus NordVPN.
 
-- **AWS EC2 Instance**: Our network environment was established using an Amazon EC2 Linux VM, hosting the OpenVPN Access Server throughout development and analysis.
+- **AWS EC2 Instance**: My network environment was established using an Amazon EC2 Linux VM (OpenVPN Access Server image from the AWS Marketplace), hosting the OpenVPN Access Server throughout development and analysis.
 - **SSH Client**: Connection to the server via SSH enabled installation and configuration of the access server.
-- **VPN Client**: Compatible with major OS; we used macOS for testing.
+- **VPN Client**: Compatible with major OS; I used macOS for testing.
 - **Terminal Commands**: Used to test speed and latency.
-    - `networkquality`: Measured connection speed and latency, showing slower download speeds for our self-hosted VPN due to VM limitations.
+    - `networkquality`: Measured connection speed and latency, showing slower download speeds for my self-hosted VPN due to VM limitations.
     - `traceroute`: Examined path and hops to reach servers (e.g., google.com).
-- **Wireshark**: Captured network traffic while connected to our VPN. OpenVPN encrypted packets, revealing less data about transfers.
-- **NordVPN Comparison**: Wireguard protocol used by NordVPN showed slightly faster packet transfer rates. Most packets were encrypted, with no other protocol visible compared to our OpenVPN server.
+- **Wireshark**: Captured network traffic while connected to my VPN. OpenVPN encrypted packets, revealing less data about transfers.
+- **NordVPN Comparison**: Wireguard protocol used by NordVPN showed slightly faster packet transfer rates. Most packets were encrypted, with no other protocol visible compared to my OpenVPN server.
 - **Scripts**: We used scripts to automate the analysis process, including capturing packets and analyzing network traffic.
 
 ## References

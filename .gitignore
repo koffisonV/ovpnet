@@ -1,0 +1,8 @@
+.DS_Store
+*.pcap
+*.pcapng
+*.ovpn
+*.pem
+*.key
+net_analysis/
+__pycache__/
